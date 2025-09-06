@@ -23,10 +23,31 @@ public static class InputHandler {
         return input != ConsoleKey.Spacebar;
     }
 
+    public static (int start, int end) GetBenchmarkRange() {
+        int maxProblems = ProblemFactory.SolvedProblems();
+        
+        Library.FunPrint($"Enter start problem number (1-{maxProblems}): ");
+        int start = GetValidProblemNumber(1, maxProblems);
+        
+        Library.FunPrint($"Enter end problem number ({start}-{maxProblems}): ");
+        int end = GetValidProblemNumber(start, maxProblems);
+        
+        return (start, end);
+    }
+
+    private static int GetValidProblemNumber(int min, int max) {
+        while (true) {
+            string input = Console.ReadLine()?.Trim() ?? string.Empty;
+            
+            if (int.TryParse(input, out int number) && number >= min && number <= max) return number;
+            
+            Library.FunPrint($"Invalid input. Please enter a number between {min} and {max}: ");
+        }
+    }
+
     private static bool IsValidSelection(string input) {
         if (string.IsNullOrWhiteSpace(input)) return false;
-        if (int.TryParse(input, out int num))
-            return num > 0 && num <= ProblemFactory.SolvedProblems();
+        if (int.TryParse(input, out int num)) return num > 0 && num <= ProblemFactory.SolvedProblems();
         return input.Equals(SolveAllCommand, StringComparison.OrdinalIgnoreCase) ||
                input.Equals(RunTestsCommand, StringComparison.OrdinalIgnoreCase);
     }

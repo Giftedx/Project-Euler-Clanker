@@ -1,19 +1,22 @@
-using System.Collections;
-using System.Numerics;
+ using System.Collections;
+ using System.Collections.Concurrent;
+ using System.Numerics;
 
 // ReSharper disable UnusedMember.Global
 
 namespace Project_Euler;
 
 public static class Library {
+    private static readonly ConcurrentDictionary<int, bool> _primeCache = new();
+    private static readonly ConcurrentDictionary<long, bool> _primeCacheLong = new();
+    
     //Program-wide tasks.
     public static void FunPrint(string s) {
-        const int wait = 10;
+        const int wait = 100;
         foreach (char c in s) {
             Console.Write(c);
-            Thread.Sleep(wait);
+            Thread.Sleep(Random.Shared.Next(wait));
         }
-
         Console.WriteLine();
     }
 
@@ -75,12 +78,38 @@ public static class Library {
 
         return count;
     }
+    
+    public static int NumDigits(int n) {
+        return n switch {
+            < 10 => 1,
+            < 100 => 2,
+            < 1000 => 3,
+            < 10000 => 4,
+            < 100000 => 5,
+            < 1000000 => 6,
+            < 10000000 => 7,
+            < 100000000 => 8,
+            < 1000000000 => 9,
+            _ => 10
+        };
+    }
 
     //Boolean Checks
 
     public static bool IsPalindrome(int n) {
         int reverse = 0;
         int temp = Math.Abs(n);
+        while (temp != 0) {
+            reverse = reverse * 10 + temp % 10;
+            temp /= 10;
+        }
+
+        return reverse == Math.Abs(n);
+    }
+    
+    public static bool IsPalindrome(long n) {
+        long reverse = 0;
+        long temp = Math.Abs(n);
         while (temp != 0) {
             reverse = reverse * 10 + temp % 10;
             temp /= 10;
@@ -96,23 +125,72 @@ public static class Library {
 
         return true;
     }
-
+    
     public static bool IsPrime(int n) {
+        if (_primeCache.TryGetValue(n, out bool cached))
+            return cached;
+
+        bool result;
         switch (n) {
             case <= 1:
-                return false;
+                result = false;
+                break;
             case 2 or 3:
-                return true;
+                result = true;
+                break;
+            default:
+                if (n % 2 == 0 || n % 3 == 0) {
+                    result = false;
+                } else {
+                    result = true;
+                    for (int i = 5; i * i <= n; i += 6) {
+                        if (n % i != 0 && n % (i + 2) != 0) continue;
+                        result = false;
+                        break;
+                    }
+                }
+
+                break;
         }
 
-        if (n % 2 == 0) return false;
-        if (n % 3 == 0) return false;
+        _primeCache[n] = result;
+        return result;
+    }
 
-        for (int i = 5; i * i <= n; i += 6)
-            if (n % i == 0 || n % (i + 2) == 0)
-                return false;
+    public static bool IsPrime(long n) {
+        if (_primeCacheLong.TryGetValue(n, out bool cached))
+            return cached;
 
-        return true;
+        bool result;
+        switch (n) {
+            case <= 1:
+                result = false;
+                break;
+            case 2 or 3:
+                result = true;
+                break;
+            default:
+                if (n % 2 == 0 || n % 3 == 0) {
+                    result = false;
+                } else {
+                    result = true;
+                    for (long i = 5; i * i <= n; i += 6) {
+                        if (n % i != 0 && n % (i + 2) != 0) continue;
+                        result = false;
+                        break;
+                    }
+                }
+
+                break;
+        }
+
+        _primeCacheLong[n] = result;
+        return result;
+    }
+
+    public static void PrecomputePrimes(int limit) {
+        bool[] sieve = GetSieve(limit);
+        for (int i = 2; i < limit; i++) _primeCache[i] = sieve[i];
     }
 
     public static bool IsPentagon(long pn) {
@@ -140,6 +218,21 @@ public static class Library {
 
         return result == 0x1ff;
     }
+    
+    public static bool SameDigits(int a, int b) {
+        int[] digits = new int[10];
+        while (a > 0) {
+            int digita = a % 10;
+            int digitb =  b % 10;
+            a /= 10;
+            b /= 10;
+            digits[digita]++;
+            digits[digitb]--;
+        }
+        if(b > 0)return false;
+        foreach (int digit in digits) if(digit != 0)return false;
+        return true;
+    }
 
     //Array Operations
 
@@ -155,6 +248,10 @@ public static class Library {
         return true;
     }
 
+    public static bool[] GetSieve(int limit) {
+        SieveOfEratosthenes(limit, out bool[] sieve);
+        return sieve;
+    }
 
     public static void SieveOfEratosthenes(int n, out bool[] isPrime) {
         isPrime = new bool[n];
@@ -180,7 +277,8 @@ public static class Library {
         }
     }
 
-    public static void GetPrimeList(IList<int> numbers, out HashSet<int> primeSet) {
-        primeSet = numbers.AsParallel().Where(IsPrime).ToHashSet();
+    public static void GetPrimeList(int upperLimit, out List<int> primeList) {
+        var numbers = Enumerable.Range(1, upperLimit).ToList();
+        primeList = numbers.AsParallel().Where(IsPrime).ToList();
     }
 }
