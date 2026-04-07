@@ -226,15 +226,16 @@ public static class Library {
     public static bool SameDigits(int a, int b) {
         int[] digits = new int[10];
         while (a > 0) {
-            int digita = a % 10;
-            int digitb =  b % 10;
+            digits[a % 10]++;
             a /= 10;
-            b /= 10;
-            digits[digita]++;
-            digits[digitb]--;
         }
-        if(b > 0)return false;
-        foreach (int digit in digits) if(digit != 0)return false;
+        while (b > 0) {
+            digits[b % 10]--;
+            b /= 10;
+        }
+        foreach (int count in digits) {
+            if (count != 0) return false;
+        }
         return true;
     }
 
