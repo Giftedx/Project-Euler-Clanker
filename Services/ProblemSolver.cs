@@ -65,17 +65,25 @@ public class ProblemSolver(IOutputHandler outputHandler, IStatisticsCalculator s
     private static ProblemData Run(int n, int runs = BenchmarkConfig.DefaultBenchmarkRuns) {
         var data = new ProblemData(n, runs);
         var problem = ProblemFactory.CreateProblem(n);
-        
+
+        // Warm-up: let JIT compile hot paths before timing
+        for (int w = 0; w < BenchmarkConfig.WarmupRuns; w++)
+            problem.Solve();
+
+        // Clean heap state before measurement
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+        GC.WaitForPendingFinalizers();
+
         for (int i = 0; i < runs; i++) {
             var watch = Stopwatch.StartNew();
-            
+
             object result = problem.Solve();
             watch.Stop();
-            
+
             if (i == 0) data.Result = result.ToString() ?? string.Empty;
             data.Times.Add(watch.Elapsed.TotalMilliseconds);
         }
-        
+
         return data;
     }
     

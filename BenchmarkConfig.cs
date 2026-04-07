@@ -4,8 +4,9 @@ namespace Project_Euler;
 
 public static class BenchmarkConfig {
     public const int DefaultBenchmarkRuns = 100;
+    public const int WarmupRuns = 5;
     public const int ProgressBarWidth = 50;
-    public const int ProgressUpdateIntervalMs = 10;
+    public const int ProgressUpdateIntervalMs = 100;
     public const char ProgressFilledChar = '#';
     public const char ProgressEmptyChar = '-';
     
