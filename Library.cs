@@ -204,10 +204,15 @@ public static class Library {
 
     public static bool IsPandigital(string s) {
         if (s.Length != 9) return false;
-        char[] chars = s.ToCharArray();
-        Array.Sort(chars);
-        bool result = new string(chars).Equals("123456789");
-        return result;
+        int[] digits = new int[10];
+        foreach (char c in s) {
+            if (c < '1' || c > '9') return false;
+            digits[c - '0']++;
+        }
+        for (int i = 1; i <= 9; i++) {
+            if (digits[i] != 1) return false;
+        }
+        return true;
     }
 
     public static bool IsPanDigital(int n) {
