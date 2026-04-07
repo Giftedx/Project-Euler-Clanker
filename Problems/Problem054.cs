@@ -1,7 +1,7 @@
 namespace Project_Euler.Problems;
 
 public class Problem054 : Problem {
-    private readonly string[] _hands = File.ReadAllLines("poker.txt");
+    private readonly string[] _hands = File.ReadAllLines(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "poker.txt"));
 
     public override object Solve() {
         return Player1WinCount();

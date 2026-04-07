@@ -13,7 +13,7 @@ public static class BenchmarkConfig {
     public const string LogFile = "log.txt";
     public const string JsonFile = "benchmark.json";
     public const string HtmlFile = "benchmark.html";
-    public const string HtmlTemplate = "template.html";
+    public const string HtmlTemplate = "data/template.html";
     
     public static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     

@@ -9,7 +9,11 @@ internal static class Program {
             { "t", ("run test routine", () => ServiceContainer.GetService<IProblemSolver>().RunTest()) }
         };
     
-    public static void Main() {
+    public static void Main(string[] args) {
+        if (args.Contains("--verify")) {
+            TestRunner.RunAll();
+            return;
+        }
         Library.PrecomputePrimes(100000);
         ServiceContainer.ConfigureServices();
         RunInteractionLoop();

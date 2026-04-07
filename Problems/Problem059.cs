@@ -4,7 +4,7 @@ public class Problem059 : Problem {
     private readonly int[] _ciphertext;
 
     public Problem059() {
-        string input = File.ReadAllText("0059_cipher.txt");
+        string input = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "0059_cipher.txt"));
         _ciphertext = input.Split(',').Select(int.Parse).ToArray();
     }
 

@@ -1,0 +1,10 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Benchmark output files
+log.txt
+benchmark.json
+benchmark.html
