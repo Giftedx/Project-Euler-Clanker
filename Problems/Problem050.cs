@@ -9,42 +9,35 @@ public class Problem050 : Problem {
     }
 
     private long ConsecutivePrimeSumBelow(int n) {
-        int highestPrime = n - Enumerable
-                               .Range(1, n)
-                               .First(i => Library.IsPrime(n - i));
+        // Build list of primes up to n
+        var primes = new List<int>();
+        for (int i = 2; i < n; i++) {
+            if (_isPrime[i]) primes.Add(i);
+        }
 
-        int maxSequence = GetMaxSequence(highestPrime);
+        // Build prefix sums for O(1) range sum queries
+        long[] prefixSum = new long[primes.Count + 1];
+        for (int i = 0; i < primes.Count; i++) {
+            prefixSum[i + 1] = prefixSum[i] + primes[i];
+        }
 
-        for (int sequence = maxSequence;; sequence--) {
-            Queue<int> primes = new(sequence);
-            primes.Enqueue(2);
+        int bestLength = 0;
+        long bestPrime = 0;
 
-            for (int i = 3; i < n; i += 2) {
-                if (!_isPrime[i]) continue;
-                if (primes.Count < sequence) {
-                    primes.Enqueue(i);
-                    if (primes.Count < sequence) continue;
-                } else {
-                    primes.Dequeue();
-                    primes.Enqueue(i);
+        for (int start = 0; start < primes.Count; start++) {
+            for (int end = start + bestLength + 1; end <= primes.Count; end++) {
+                long sum = prefixSum[end] - prefixSum[start];
+                if (sum >= n) break;
+                if (sum > 0 && sum < _isPrime.Length && _isPrime[(int)sum]) {
+                    int length = end - start;
+                    if (length > bestLength) {
+                        bestLength = length;
+                        bestPrime = sum;
+                    }
                 }
-
-                int sum = primes.Sum();
-                if (sum > highestPrime) break;
-                if (Library.IsPrime(sum)) return sum;
             }
         }
-    }
 
-    private int GetMaxSequence(int highestPrime) {
-        int maxSequence = 1;
-        for (int i = 3, sum = 2;; i += 2) {
-            if (sum + i > highestPrime) break;
-            if (!_isPrime[i]) continue;
-            maxSequence++;
-            sum += i;
-        }
-
-        return maxSequence;
+        return bestPrime;
     }
 }
