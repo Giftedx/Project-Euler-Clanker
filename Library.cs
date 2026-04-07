@@ -143,10 +143,12 @@ public static class Library {
                     result = false;
                 } else {
                     result = true;
-                    for (int i = 5; i * i <= n; i += 6) {
-                        if (n % i != 0 && n % (i + 2) != 0) continue;
-                        result = false;
-                        break;
+                    int limit = (int)Math.Sqrt(n);
+                    for (int i = 5; i <= limit; i += 6) {
+                        if (n % i == 0 || n % (i + 2) == 0) {
+                            result = false;
+                            break;
+                        }
                     }
                 }
 
@@ -174,10 +176,12 @@ public static class Library {
                     result = false;
                 } else {
                     result = true;
-                    for (long i = 5; i * i <= n; i += 6) {
-                        if (n % i != 0 && n % (i + 2) != 0) continue;
-                        result = false;
-                        break;
+                    long limit = (long)Math.Sqrt(n);
+                    for (long i = 5; i <= limit; i += 6) {
+                        if (n % i == 0 || n % (i + 2) == 0) {
+                            result = false;
+                            break;
+                        }
                     }
                 }
 
