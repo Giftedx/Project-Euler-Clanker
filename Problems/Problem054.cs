@@ -77,7 +77,8 @@ public class Problem054 : Problem {
 
         int highCard = values[4];
 
-        // Build kickers list (cards not in groups, descending)
+        // Build kickers list (cards not in groups, descending order for proper comparison)
+        // Each kicker gets 4 bits, packed from high to low significance
         int kickers = 0;
         int shift = 0;
         for (int v = 2; v <= 14; v++) {
@@ -87,15 +88,17 @@ public class Problem054 : Problem {
             }
         }
 
-        // Rank by category
+        // Rank by category — each category uses non-overlapping bit fields:
+        // Bits 20-23: category (0-8), ensures hand types never overlap
+        // Bits 0-19: tiebreakers, layout varies by category
         if (isStraight && isFlush)       return (8 << 20) | highCard;
-        if (fourVal > 0)                 return (7 << 20) | (fourVal << 4) | kickers;
+        if (fourVal > 0)                 return (7 << 20) | (fourVal << 4) | kickers;         // 1 kicker in 0-3
         if (threeVal > 0 && pairs >= 1)  return (6 << 20) | (threeVal << 4) | pairHigh;
-        if (isFlush)                     return (5 << 20) | kickers;
+        if (isFlush)                     return (5 << 20) | kickers;                          // 5 kickers in 0-19
         if (isStraight)                  return (4 << 20) | highCard;
-        if (threeVal > 0)               return (3 << 20) | (threeVal << 8) | kickers;
-        if (pairs == 2)                  return (2 << 20) | (pairHigh << 8) | (pairLow << 4) | kickers;
-        if (pairs == 1)                  return (1 << 20) | (pairHigh << 8) | kickers;
+        if (threeVal > 0)               return (3 << 20) | (threeVal << 12) | kickers;        // 2 kickers in 0-7, three in 12-15
+        if (pairs == 2)                  return (2 << 20) | (pairHigh << 8) | (pairLow << 4) | kickers; // 1 kicker in 0-3
+        if (pairs == 1)                  return (1 << 20) | (pairHigh << 16) | kickers;       // 3 kickers in 0-11, pair in 16-19
         return kickers;
     }
 }

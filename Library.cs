@@ -143,7 +143,7 @@ public static class Library {
                     result = false;
                 } else {
                     result = true;
-                    int limit = (int)Math.Sqrt(n);
+                    int limit = (int)Math.Sqrt(n) + 1;
                     for (int i = 5; i <= limit; i += 6) {
                         if (n % i == 0 || n % (i + 2) == 0) {
                             result = false;
@@ -176,7 +176,7 @@ public static class Library {
                     result = false;
                 } else {
                     result = true;
-                    long limit = (long)Math.Sqrt(n);
+                    long limit = (long)Math.Sqrt(n) + 1;
                     for (long i = 5; i <= limit; i += 6) {
                         if (n % i == 0 || n % (i + 2) == 0) {
                             result = false;

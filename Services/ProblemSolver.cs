@@ -70,9 +70,11 @@ public class ProblemSolver(IOutputHandler outputHandler, IStatisticsCalculator s
         for (int w = 0; w < BenchmarkConfig.WarmupRuns; w++)
             problem.Solve();
 
-        // Clean heap state before measurement
-        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-        GC.WaitForPendingFinalizers();
+        // Clean heap state before measurement (skip in parallel runs to avoid process-wide GC stalls)
+        if (runs <= 1) {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+            GC.WaitForPendingFinalizers();
+        }
 
         for (int i = 0; i < runs; i++) {
             var watch = Stopwatch.StartNew();
