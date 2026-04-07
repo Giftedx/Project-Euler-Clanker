@@ -278,7 +278,10 @@ public static class Library {
     }
 
     public static void GetPrimeList(int upperLimit, out List<int> primeList) {
-        var numbers = Enumerable.Range(1, upperLimit).ToList();
-        primeList = numbers.AsParallel().Where(IsPrime).ToList();
+        bool[] sieve = GetSieve(upperLimit);
+        primeList = new List<int>();
+        for (int i = 2; i < upperLimit; i++) {
+            if (sieve[i]) primeList.Add(i);
+        }
     }
 }
