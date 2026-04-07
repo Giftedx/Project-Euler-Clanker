@@ -62,29 +62,75 @@ public class Problem060 : Problem {
         }
 
         if (primes == null) return 0;
-        var candidates = primes.Where(p => graph.ContainsKey(p) && graph[p].Count >= 4).ToList();
-        
+        var candidates = new List<int>();
+        foreach (int p in primes) {
+            if (graph.TryGetValue(p, out var neighbors) && neighbors.Count >= 4)
+                candidates.Add(p);
+        }
+
         int minSum = int.MaxValue;
-        object lockObj = new();
-        
-        Parallel.ForEach(candidates, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, a => {
-            var aList = graph[a].Where(x => x > a).ToList();
-            if (aList.Count < 4) return;
-            
-            foreach (int sum in from b in aList 
-                     where graph.ContainsKey(b) 
-                     let bList = graph[b] 
-                     let commonAB = aList.Where(c => c > b && bList.Contains(c)).ToList() 
-                     where commonAB.Count >= 3 from c in commonAB 
-                     where graph.ContainsKey(c) let cList = graph[c] 
-                     let commonABC = commonAB.Where(d => d > c && bList.Contains(d) && cList.Contains(d)).ToList() 
-                     where commonABC.Count >= 2 from d in commonABC 
-                     where graph.ContainsKey(d) let dList = graph[d] from e 
-                         in commonABC.Where(e => e > d && bList.Contains(e) && cList.Contains(e) && dList.Contains(e)) 
-                     select a + b + c + d + e) {
-                lock (lockObj) if (sum < minSum) minSum = sum;
-            }
-        });
+
+        Parallel.ForEach(candidates, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+            () => int.MaxValue,
+            (a, _, localMin) => {
+                if (!graph.TryGetValue(a, out var aNeighbors)) return localMin;
+
+                var aList = new List<int>();
+                foreach (int x in aNeighbors) {
+                    if (x > a) aList.Add(x);
+                }
+                if (aList.Count < 4) return localMin;
+
+                for (int bi = 0; bi < aList.Count; bi++) {
+                    int b = aList[bi];
+                    if (!graph.TryGetValue(b, out var bNeighbors)) continue;
+
+                    var commonAB = new List<int>();
+                    for (int ci = bi + 1; ci < aList.Count; ci++) {
+                        if (bNeighbors.Contains(aList[ci]))
+                            commonAB.Add(aList[ci]);
+                    }
+                    if (commonAB.Count < 3) continue;
+
+                    for (int ci = 0; ci < commonAB.Count; ci++) {
+                        int c = commonAB[ci];
+                        if (!graph.TryGetValue(c, out var cNeighbors)) continue;
+
+                        var commonABC = new List<int>();
+                        for (int di = ci + 1; di < commonAB.Count; di++) {
+                            int d = commonAB[di];
+                            if (bNeighbors.Contains(d) && cNeighbors.Contains(d))
+                                commonABC.Add(d);
+                        }
+                        if (commonABC.Count < 2) continue;
+
+                        for (int di = 0; di < commonABC.Count; di++) {
+                            int d = commonABC[di];
+                            if (!graph.TryGetValue(d, out var dNeighbors)) continue;
+
+                            for (int ei = di + 1; ei < commonABC.Count; ei++) {
+                                int e = commonABC[ei];
+                                if (bNeighbors.Contains(e) && cNeighbors.Contains(e) && dNeighbors.Contains(e)) {
+                                    int sum = a + b + c + d + e;
+                                    if (sum < localMin) localMin = sum;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return localMin;
+            },
+            localMin => {
+                if (localMin < int.MaxValue) {
+                    int current = Volatile.Read(ref minSum);
+                    while (localMin < current) {
+                        int prev = Interlocked.CompareExchange(ref minSum, localMin, current);
+                        if (prev == current) break;
+                        current = prev;
+                    }
+                }
+            });
         
         return minSum == int.MaxValue ? -1 : minSum;
     }
