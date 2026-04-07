@@ -1,179 +1,125 @@
-using System.Collections.Concurrent;
-
 namespace Project_Euler.Problems;
 
 public class Problem060 : Problem {
-    private static List<int>? primes;
-    private static bool[]? sieve;
-    private static readonly ConcurrentDictionary<long, bool> primeCache = new();
-    
-    public Problem060() => GeneratePrimes(10000);
+    private int[] _primes = null!;
+    private bool[] _sieve = null!;
+    private readonly Dictionary<long, bool> _cache = new();
+
     public override object Solve() => FindPrimePairSet();
 
-    private void GeneratePrimes(int limit) {
-        sieve = new bool[limit + 1];
-        Array.Fill(sieve, true);
-        sieve[0] = sieve[1] = false;
-        
-        for (int i = 2; i * i <= limit; i++) {
-            if (!sieve[i]) continue;
-            for (int j = i * i; j <= limit; j += i) sieve[j] = false;
-        }
-        
-        primes = [];
-        for (int i = 2; i <= limit; i++) {
-            if (!sieve[i]) continue;
-            primes.Add(i);
-            primeCache[i] = true;
-        }
-    }
-
     private int FindPrimePairSet() {
-        var graph = new Dictionary<int, HashSet<int>>();
+        const int limit = 10000;
+        _sieve = Library.GetSieve(limit);
 
-        if (primes != null) {
-            var chunks = Partitioner.Create(0, primes.Count, Math.Max(1, primes.Count / Environment.ProcessorCount));
-            var localGraphs = new ConcurrentBag<Dictionary<int, HashSet<int>>>();
-        
-            Parallel.ForEach(chunks, chunk => {
-                var localGraph = new Dictionary<int, HashSet<int>>();
-            
-                for (int i = chunk.Item1; i < chunk.Item2; i++) {
-                    int p = primes[i];
-                    for (int j = i + 1; j < primes.Count; j++) {
-                        int q = primes[j];
-                        if (!AreConcatenationsPrime(p, q)) continue;
-                    
-                        if (!localGraph.ContainsKey(p)) localGraph[p] = [];
-                        if (!localGraph.ContainsKey(q)) localGraph[q] = [];
-                        localGraph[p].Add(q);
-                        localGraph[q].Add(p);
-                    }
-                }
-                localGraphs.Add(localGraph);
-            });
-        
-            foreach (var localGraph in localGraphs) {
-                foreach (var kvp in localGraph) {
-                    if (!graph.ContainsKey(kvp.Key)) graph[kvp.Key] = new HashSet<int>();
-                    graph[kvp.Key].UnionWith(kvp.Value);
+        var primeList = new List<int>();
+        for (int i = 2; i < limit; i++) {
+            if (_sieve[i]) primeList.Add(i);
+        }
+        _primes = primeList.ToArray();
+        int n = _primes.Length;
+
+        // Build adjacency: adj[i] = sorted list of indices j > i where pair(i,j) works
+        var adj = new List<int>[n];
+        for (int i = 0; i < n; i++) adj[i] = new List<int>();
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (AreConcatPrime(_primes[i], _primes[j])) {
+                    adj[i].Add(j);
                 }
             }
         }
 
-        if (primes == null) return 0;
-        var candidates = new List<int>();
-        foreach (int p in primes) {
-            if (graph.TryGetValue(p, out var neighbors) && neighbors.Count >= 4)
-                candidates.Add(p);
-        }
+        int best = int.MaxValue;
 
-        int minSum = int.MaxValue;
+        for (int a = 0; a < n && _primes[a] * 5 < best; a++) {
+            var aList = adj[a];
 
-        Parallel.ForEach(candidates, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-            () => int.MaxValue,
-            (a, _, localMin) => {
-                if (!graph.TryGetValue(a, out var aNeighbors)) return localMin;
+            for (int bi = 0; bi < aList.Count; bi++) {
+                int b = aList[bi];
+                if (_primes[a] + _primes[b] * 4 >= best) break;
+                var bList = adj[b];
 
-                var aList = new List<int>();
-                foreach (int x in aNeighbors) {
-                    if (x > a) aList.Add(x);
-                }
-                if (aList.Count < 4) return localMin;
+                for (int ci = bi + 1; ci < aList.Count; ci++) {
+                    int c = aList[ci];
+                    if (_primes[a] + _primes[b] + _primes[c] * 3 >= best) break;
+                    if (!bList.Contains(c)) continue;
+                    var cList = adj[c];
 
-                for (int bi = 0; bi < aList.Count; bi++) {
-                    int b = aList[bi];
-                    if (!graph.TryGetValue(b, out var bNeighbors)) continue;
+                    for (int di = ci + 1; di < aList.Count; di++) {
+                        int d = aList[di];
+                        if (_primes[a] + _primes[b] + _primes[c] + _primes[d] * 2 >= best) break;
+                        if (!bList.Contains(d) || !cList.Contains(d)) continue;
+                        var dList = adj[d];
 
-                    var commonAB = new List<int>();
-                    for (int ci = bi + 1; ci < aList.Count; ci++) {
-                        if (bNeighbors.Contains(aList[ci]))
-                            commonAB.Add(aList[ci]);
-                    }
-                    if (commonAB.Count < 3) continue;
-
-                    for (int ci = 0; ci < commonAB.Count; ci++) {
-                        int c = commonAB[ci];
-                        if (!graph.TryGetValue(c, out var cNeighbors)) continue;
-
-                        var commonABC = new List<int>();
-                        for (int di = ci + 1; di < commonAB.Count; di++) {
-                            int d = commonAB[di];
-                            if (bNeighbors.Contains(d) && cNeighbors.Contains(d))
-                                commonABC.Add(d);
-                        }
-                        if (commonABC.Count < 2) continue;
-
-                        for (int di = 0; di < commonABC.Count; di++) {
-                            int d = commonABC[di];
-                            if (!graph.TryGetValue(d, out var dNeighbors)) continue;
-
-                            for (int ei = di + 1; ei < commonABC.Count; ei++) {
-                                int e = commonABC[ei];
-                                if (bNeighbors.Contains(e) && cNeighbors.Contains(e) && dNeighbors.Contains(e)) {
-                                    int sum = a + b + c + d + e;
-                                    if (sum < localMin) localMin = sum;
-                                }
+                        for (int ei = di + 1; ei < aList.Count; ei++) {
+                            int e = aList[ei];
+                            int sum = _primes[a] + _primes[b] + _primes[c] + _primes[d] + _primes[e];
+                            if (sum >= best) break;
+                            if (bList.Contains(e) && cList.Contains(e) && dList.Contains(e)) {
+                                best = sum;
                             }
                         }
                     }
                 }
+            }
+        }
 
-                return localMin;
-            },
-            localMin => {
-                if (localMin < int.MaxValue) {
-                    int current = Volatile.Read(ref minSum);
-                    while (localMin < current) {
-                        int prev = Interlocked.CompareExchange(ref minSum, localMin, current);
-                        if (prev == current) break;
-                        current = prev;
-                    }
-                }
-            });
-        
-        return minSum == int.MaxValue ? -1 : minSum;
+        return best == int.MaxValue ? -1 : best;
     }
 
-    private bool AreConcatenationsPrime(int a, int b) => IsPrime(ConcatInts(a, b)) && IsPrime(ConcatInts(b, a));
-
-    private static long ConcatInts(int a, int b) {
-        long multiplier = 10;
-        while (multiplier <= b) multiplier *= 10;
-        return a * multiplier + b;
+    private bool AreConcatPrime(int a, int b) {
+        return IsPrimeFast(Concat(a, b)) && IsPrimeFast(Concat(b, a));
     }
 
-    private bool IsPrime(long n) {
-        if (sieve != null && n < sieve.Length) return sieve[n];
-        if (primeCache.TryGetValue(n, out bool cached)) return cached;
-        
-        bool isPrime = IsPrimeFast(n);
-        primeCache.TryAdd(n, isPrime);
-        return isPrime;
+    private static long Concat(int a, int b) {
+        long mul = 10;
+        while (mul <= b) mul *= 10;
+        return a * mul + b;
     }
 
     private bool IsPrimeFast(long n) {
-        switch (n) {
-            case < 2:
-                return false;
-            case 2:
-            case 3:
-                return true;
+        if (n < _sieve.Length) return _sieve[n];
+        if (_cache.TryGetValue(n, out bool cached)) return cached;
+
+        bool result = MillerRabin(n);
+        _cache[n] = result;
+        return result;
+    }
+
+    private static bool MillerRabin(long n) {
+        if (n < 2) return false;
+        if (n is 2 or 3 or 5 or 7) return true;
+        if (n % 2 == 0 || n % 3 == 0 || n % 5 == 0) return false;
+
+        long d = n - 1;
+        int r = 0;
+        while ((d & 1) == 0) { d >>= 1; r++; }
+
+        ReadOnlySpan<long> witnesses = [2, 3, 5, 7];
+        foreach (long a in witnesses) {
+            if (a >= n) continue;
+            long x = ModPow(a, d, n);
+            if (x == 1 || x == n - 1) continue;
+
+            bool composite = true;
+            for (int i = 0; i < r - 1; i++) {
+                x = x * x % n;
+                if (x == n - 1) { composite = false; break; }
+            }
+            if (composite) return false;
         }
-
-        if (n % 2 == 0 || n % 3 == 0) return false;
-
-        if (primes != null)
-            for (int i = 2; i < primes.Count && (long)primes[i] * primes[i] <= n; i++)
-                if (n % primes[i] == 0)
-                    return false;
-
-        long sqrt_n = (long)Math.Sqrt(n);
-        if (primes == null) return true;
-        for (long i = primes.Count > 2 ? primes[^1] : 5; i <= sqrt_n; i += 6)
-            if (n % i == 0 || n % (i + 2) == 0)
-                return false;
-
         return true;
+    }
+
+    private static long ModPow(long baseVal, long exp, long mod) {
+        long result = 1;
+        baseVal %= mod;
+        while (exp > 0) {
+            if ((exp & 1) == 1) result = result * baseVal % mod;
+            exp >>= 1;
+            baseVal = baseVal * baseVal % mod;
+        }
+        return result;
     }
 }

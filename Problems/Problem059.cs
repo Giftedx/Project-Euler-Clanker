@@ -13,52 +13,46 @@ public class Problem059 : Problem {
     }
 
     private int SumAscii() {
+        // Precompute score lookup table
+        int[] scoreTable = new int[256];
+        Array.Fill(scoreTable, -1);
+        for (int i = 'a'; i <= 'z'; i++) scoreTable[i] = 2;
+        for (int i = 'A'; i <= 'Z'; i++) scoreTable[i] = 1;
+        scoreTable[' '] = 3;
+        scoreTable['.'] = 1; scoreTable[','] = 1; scoreTable['\''] = 1; scoreTable[';'] = 1;
+        scoreTable['\n'] = 0; scoreTable['\r'] = 0; scoreTable['\t'] = 0;
+
         int len = _ciphertext.Length;
-        int bestSum = 0;
-        int maxScore = int.MinValue;
+        // Split ciphertext by position mod 3 for independent key search
+        // This reduces from 26^3 to 3 * 26 independent checks
+        int[][] groups = new int[3][];
+        for (int g = 0; g < 3; g++) {
+            int count = (len - g + 2) / 3;
+            groups[g] = new int[count];
+            for (int i = 0; i < count; i++) groups[g][i] = _ciphertext[g + i * 3];
+        }
 
-        Parallel.For(97, 123, () => (score: int.MinValue, sum: 0),
-            (a, _, localBest) => {
-                for (int b = 97; b <= 122; b++) {
-                    for (int c = 97; c <= 122; c++) {
-                        int score = 0;
-                        int sum = 0;
-
-                        for (int i = 0; i < len; i++) {
-                            int key = (i % 3) switch {
-                                0 => a,
-                                1 => b,
-                                _ => c
-                            };
-                            int decoded = _ciphertext[i] ^ key;
-                            score += ScoreChar(decoded);
-                            sum += decoded;
-                        }
-
-                        if (score > localBest.score) {
-                            localBest = (score, sum);
-                        }
-                    }
+        int[] bestKeys = new int[3];
+        for (int g = 0; g < 3; g++) {
+            int bestScore = int.MinValue;
+            for (int key = 97; key <= 122; key++) {
+                int score = 0;
+                foreach (int ch in groups[g]) {
+                    int decoded = ch ^ key;
+                    score += decoded < 256 ? scoreTable[decoded] : -1;
                 }
-                return localBest;
-            },
-            localBest => {
-                lock (_ciphertext) {
-                    if (localBest.score > maxScore) {
-                        maxScore = localBest.score;
-                        bestSum = localBest.sum;
-                    }
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestKeys[g] = key;
                 }
-            });
+            }
+        }
 
-        return bestSum;
-
-        static int ScoreChar(int c) => c switch {
-            >= 'a' and <= 'z' => 2,
-            >= 'A' and <= 'Z' => 1,
-            ' ' => 3,
-            '.' or ',' or '\'' or ';' => 1,
-            _ => -1
-        };
+        // Compute sum with best keys
+        int sum = 0;
+        for (int i = 0; i < len; i++) {
+            sum += _ciphertext[i] ^ bestKeys[i % 3];
+        }
+        return sum;
     }
 }

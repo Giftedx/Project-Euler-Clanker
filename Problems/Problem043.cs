@@ -10,33 +10,29 @@ public class Problem043 : Problem {
 
     private long SubStringDivisiblePandigitalSum() {
         long total = 0;
-        char[] buffer = new char[10];
-        BuildPandigitalSum(0, buffer, ref total);
+        BuildPandigitalSum(0, 0, ref total);
         return total;
     }
 
-    private void BuildPandigitalSum(int depth, char[] buffer, ref long total) {
+    private void BuildPandigitalSum(int depth, long number, ref long total) {
         if (depth is >= 4 and <= 10) {
-            int value = (buffer[depth - 3] & 15) * 100 +
-                        (buffer[depth - 2] & 15) * 10 +
-                        (buffer[depth - 1] & 15);
-            if (value % _tests[depth - 4] != 0)
+            // Check last 3 digits divisibility
+            int lastThree = (int)(number % 1000);
+            if (lastThree % _tests[depth - 4] != 0)
                 return;
         }
 
         if (depth == 10) {
-            total += long.Parse(new string(buffer));
+            total += number;
             return;
         }
 
-        for (char i = depth == 0 ? '1' : '0'; i <= '9'; i++) {
-            int index = i - '0';
-            if (_used[index]) continue;
-
-            _used[index] = true;
-            buffer[depth] = i;
-            BuildPandigitalSum(depth + 1, buffer, ref total);
-            _used[index] = false;
+        int start = depth == 0 ? 1 : 0;
+        for (int i = start; i <= 9; i++) {
+            if (_used[i]) continue;
+            _used[i] = true;
+            BuildPandigitalSum(depth + 1, number * 10 + i, ref total);
+            _used[i] = false;
         }
     }
 }

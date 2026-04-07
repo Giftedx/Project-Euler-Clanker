@@ -1,22 +1,25 @@
 namespace Project_Euler.Problems;
 
-public class Problem058 : Problem{
+public class Problem058 : Problem {
+    private readonly Dictionary<long, bool> _cache = new();
+
     public override object Solve() {
         return SpiralPrimes();
     }
 
     private int SpiralPrimes() {
         int primeCount = 0;
-        int totalDiagonals = 1; // Start with center '1'
+        int totalDiagonals = 1;
         int sideLength = 1;
 
         while (sideLength == 1 || (double)primeCount / totalDiagonals >= 0.10) {
             sideLength += 2;
-            int square = sideLength * sideLength;
+            long square = (long)sideLength * sideLength;
+            int step = sideLength - 1;
 
             for (int i = 1; i <= 3; i++) {
-                int cornerValue = square - i * (sideLength - 1);
-                if (Library.IsPrime(cornerValue)) primeCount++;
+                long cornerValue = square - (long)i * step;
+                if (IsPrimeCached(cornerValue)) primeCount++;
             }
 
             totalDiagonals += 4;
@@ -24,24 +27,47 @@ public class Problem058 : Problem{
 
         return sideLength;
     }
-    /*{
-                int primeCount = 0;
-                int totalDiagonals = 1;
-                int sideLength = 1;
 
-                while (sideLength == 1 || (double)primeCount / totalDiagonals >= 0.10) {
-                    sideLength += 2;
-                    int square = sideLength * sideLength;
+    private bool IsPrimeCached(long n) {
+        if (_cache.TryGetValue(n, out bool cached)) return cached;
+        bool result = MillerRabin(n);
+        _cache[n] = result;
+        return result;
+    }
 
-                    for (int i = 1; i <= 3; i++) {
-                        int cornerValue = square - i * (sideLength - 1);
-                        //Console.WriteLine(cornerValue);
-                        if (_isPrime[cornerValue]) primeCount++;
-                    }
+    private static bool MillerRabin(long n) {
+        if (n < 2) return false;
+        if (n is 2 or 3 or 5 or 7) return true;
+        if (n % 2 == 0 || n % 3 == 0 || n % 5 == 0) return false;
 
-                    totalDiagonals += 4;
-                }
+        long d = n - 1;
+        int r = 0;
+        while ((d & 1) == 0) { d >>= 1; r++; }
 
-                return sideLength;
-            }*/
+        ReadOnlySpan<long> witnesses = [2, 3, 5, 7];
+        foreach (long a in witnesses) {
+            if (a >= n) continue;
+            long x = ModPow(a, d, n);
+            if (x == 1 || x == n - 1) continue;
+
+            bool composite = true;
+            for (int i = 0; i < r - 1; i++) {
+                x = x * x % n;
+                if (x == n - 1) { composite = false; break; }
+            }
+            if (composite) return false;
+        }
+        return true;
+    }
+
+    private static long ModPow(long baseVal, long exp, long mod) {
+        long result = 1;
+        baseVal %= mod;
+        while (exp > 0) {
+            if ((exp & 1) == 1) result = result * baseVal % mod;
+            exp >>= 1;
+            baseVal = baseVal * baseVal % mod;
+        }
+        return result;
+    }
 }

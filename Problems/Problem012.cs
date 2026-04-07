@@ -1,6 +1,19 @@
 namespace Project_Euler.Problems;
 
 public class Problem012 : Problem {
+    // Precompute smallest prime factor for fast factorization
+    private const int Limit = 100000;
+    private readonly int[] _spf = new int[Limit];
+
+    public Problem012() {
+        for (int i = 2; i < Limit; i++) {
+            if (_spf[i] != 0) continue;
+            for (int j = i; j < Limit; j += i) {
+                if (_spf[j] == 0) _spf[j] = i;
+            }
+        }
+    }
+
     public override object Solve() {
         return HighlyDivisibleTriangle(500);
     }
@@ -20,12 +33,17 @@ public class Problem012 : Problem {
     }
 
     private int Tau(int num) {
-        int count = 0;
-        int root = (int)Math.Sqrt(num);
-        for (int i = 1; i <= root; i++)
-            if (num % i == 0)
-                count += 2;
-        if (root * root == num) count--;
+        if (num < 2) return 1;
+        int count = 1;
+        while (num > 1) {
+            int p = _spf[num];
+            int exp = 0;
+            while (num % p == 0) {
+                num /= p;
+                exp++;
+            }
+            count *= (exp + 1);
+        }
         return count;
     }
 }
