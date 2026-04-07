@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone:*)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(find /c/Users/aggis/Project-Euler-Clanker -type d ! -path */obj/* ! -path */bin/* ! -path */.git/*)"
+    ]
+  }
+}

@@ -25,7 +25,7 @@ public class StatisticsCalculator : IStatisticsCalculator {
         
         foreach (var result in results) {
             var stats = result.GetStatistics(this);
-            benchmarkData.TotalTime += stats.Best;
+            benchmarkData.TotalBestTime += stats.Best;
             
             if (stats.Worst > benchmarkData.SlowestTime) {
                 benchmarkData.SlowestTime = stats.Worst;

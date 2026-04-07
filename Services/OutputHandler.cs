@@ -37,8 +37,8 @@ public class OutputHandler(IStatisticsCalculator statisticsCalculator) : IOutput
             }
             
             fileContent.AppendLine(new string('=', 50));
-            fileContent.AppendLine($"Total Time: {testData.TotalTime:F3} ms");
-            fileContent.AppendLine($"Average solution time: {testData.TotalTime / results.Count:F3} ms");
+            fileContent.AppendLine($"Total Best Time: {testData.TotalBestTime:F3} ms");
+            fileContent.AppendLine($"Average best time: {testData.TotalBestTime / results.Count:F3} ms");
             fileContent.AppendLine($"Fastest Problem: {testData.FastestProblem} with {testData.FastestTime:F3} ms");
             fileContent.AppendLine($"Slowest Problem: {testData.SlowestProblem} with {testData.SlowestTime:F3} ms");
             
@@ -57,8 +57,8 @@ public class OutputHandler(IStatisticsCalculator statisticsCalculator) : IOutput
                 },
                 summary = new {
                     totalProblems = results.Count,
-                    totalTimeMs = testData.TotalTime,
-                    averageTimeMs = testData.TotalTime / results.Count,
+                    totalBestTimeMs = testData.TotalBestTime,
+                    averageBestTimeMs = testData.TotalBestTime / results.Count,
                     fastestProblem = new {
                         index = testData.FastestProblem,
                         timeMs = testData.FastestTime
@@ -110,8 +110,8 @@ public class OutputHandler(IStatisticsCalculator statisticsCalculator) : IOutput
             
             var summary = new {
                 totalProblems = results.Count,
-                totalTimeMs = testData.TotalTime,
-                averageTimeMs = testData.TotalTime / results.Count,
+                totalBestTimeMs = testData.TotalBestTime,
+                averageBestTimeMs = testData.TotalBestTime / results.Count,
                 fastestProblem = new {
                     index = testData.FastestProblem,
                     timeMs = testData.FastestTime
