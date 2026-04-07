@@ -11,12 +11,12 @@ public class Problem008 : Problem {
     }
 
     private long LargestProductString(int len, string digitString) {
-        int numberBound = digitString.Length - (len + 1);
         long highest = 0;
-        for (int i = 0; i < numberBound; i++) {
+        for (int i = 0; i <= digitString.Length - len; i++) {
             long product = 1;
-            string strNum = digitString.Substring(i, 13);
-            foreach (char c in strNum) product *= c & 15;
+            for (int k = 0; k < len; k++) {
+                product *= digitString[i + k] & 15;
+            }
             if (product > highest) highest = product;
         }
 
