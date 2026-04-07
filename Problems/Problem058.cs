@@ -39,6 +39,9 @@ public class Problem058 : Problem {
         if (n < 2) return false;
         if (n is 2 or 3 or 5 or 7) return true;
         if (n % 2 == 0 || n % 3 == 0 || n % 5 == 0) return false;
+        if (n % 7 == 0 || n % 11 == 0 || n % 13 == 0 || n % 17 == 0 ||
+            n % 19 == 0 || n % 23 == 0 || n % 29 == 0 || n % 31 == 0)
+            return n is 7 or 11 or 13 or 17 or 19 or 23 or 29 or 31;
 
         long d = n - 1;
         int r = 0;

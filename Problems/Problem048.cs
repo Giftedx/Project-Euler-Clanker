@@ -19,10 +19,17 @@ public class Problem048 : Problem {
         baseVal %= mod;
         while (exp > 0) {
             if ((exp & 1) == 1)
-                result = (long)((decimal)result * baseVal % mod);
+                result = MulMod(result, baseVal, mod);
             exp >>= 1;
-            baseVal = (long)((decimal)baseVal * baseVal % mod);
+            baseVal = MulMod(baseVal, baseVal, mod);
         }
         return result;
+    }
+
+    private static long MulMod(long a, long b, long mod) {
+        // Split a to avoid overflow: a*b < 10^20, won't fit in long
+        // But (a >> 17) * b < 2^51, fits in long
+        long hi = a >> 17, lo = a & 0x1FFFF;
+        return ((hi * b % mod) * 131072 % mod + lo * b % mod) % mod;
     }
 }

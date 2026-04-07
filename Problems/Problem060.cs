@@ -2,55 +2,65 @@ namespace Project_Euler.Problems;
 
 public class Problem060 : Problem {
     private int[] _primes = null!;
-    private bool[] _sieve = null!;
-    private readonly Dictionary<long, bool> _cache = new();
+    private List<int>[] _adj = null!;
+    private readonly Dictionary<long, bool> _primeCache = new();
 
-    public override object Solve() => FindPrimePairSet();
+    public override object Solve() {
+        BuildGraph();
+        return FindClique();
+    }
 
-    private int FindPrimePairSet() {
+    private void BuildGraph() {
         const int limit = 10000;
-        _sieve = Library.GetSieve(limit);
+        bool[] sieve = Library.GetSieve(limit);
 
         var primeList = new List<int>();
         for (int i = 2; i < limit; i++) {
-            if (_sieve[i]) primeList.Add(i);
+            if (sieve[i]) primeList.Add(i);
         }
         _primes = primeList.ToArray();
         int n = _primes.Length;
 
-        // Build adjacency: adj[i] = sorted list of indices j > i where pair(i,j) works
-        var adj = new List<int>[n];
-        for (int i = 0; i < n; i++) adj[i] = new List<int>();
+        _adj = new List<int>[n];
+        for (int i = 0; i < n; i++) _adj[i] = new List<int>();
 
         for (int i = 0; i < n; i++) {
+            int pi = _primes[i];
+            int ri = pi % 3;
             for (int j = i + 1; j < n; j++) {
-                if (AreConcatPrime(_primes[i], _primes[j])) {
-                    adj[i].Add(j);
+                int pj = _primes[j];
+                // concat(a,b) ≡ a+b (mod 3) — skip if ≡ 0 and neither is 3
+                if (ri != 0 && pj % 3 != ri) continue;
+                if (AreConcatPrime(pi, pj, sieve)) {
+                    _adj[i].Add(j);
                 }
             }
         }
+    }
 
+    private int FindClique() {
+        int n = _primes.Length;
         int best = int.MaxValue;
 
         for (int a = 0; a < n && _primes[a] * 5 < best; a++) {
-            var aList = adj[a];
+            var aList = _adj![a];
 
             for (int bi = 0; bi < aList.Count; bi++) {
                 int b = aList[bi];
                 if (_primes[a] + _primes[b] * 4 >= best) break;
-                var bList = adj[b];
+                var bList = _adj[b];
 
                 for (int ci = bi + 1; ci < aList.Count; ci++) {
                     int c = aList[ci];
                     if (_primes[a] + _primes[b] + _primes[c] * 3 >= best) break;
                     if (!bList.Contains(c)) continue;
-                    var cList = adj[c];
+                    var cList = _adj[c];
 
                     for (int di = ci + 1; di < aList.Count; di++) {
                         int d = aList[di];
                         if (_primes[a] + _primes[b] + _primes[c] + _primes[d] * 2 >= best) break;
                         if (!bList.Contains(d) || !cList.Contains(d)) continue;
-                        var dList = adj[d];
+                        var dList = _adj[d];
 
                         for (int ei = di + 1; ei < aList.Count; ei++) {
                             int e = aList[ei];
@@ -68,8 +78,8 @@ public class Problem060 : Problem {
         return best == int.MaxValue ? -1 : best;
     }
 
-    private bool AreConcatPrime(int a, int b) {
-        return IsPrimeFast(Concat(a, b)) && IsPrimeFast(Concat(b, a));
+    private bool AreConcatPrime(int a, int b, bool[] sieve) {
+        return IsPrimeFast(Concat(a, b), sieve) && IsPrimeFast(Concat(b, a), sieve);
     }
 
     private static long Concat(int a, int b) {
@@ -78,12 +88,11 @@ public class Problem060 : Problem {
         return a * mul + b;
     }
 
-    private bool IsPrimeFast(long n) {
-        if (n < _sieve.Length) return _sieve[n];
-        if (_cache.TryGetValue(n, out bool cached)) return cached;
-
+    private bool IsPrimeFast(long n, bool[] sieve) {
+        if (n < sieve.Length) return sieve[n];
+        if (_primeCache.TryGetValue(n, out bool cached)) return cached;
         bool result = MillerRabin(n);
-        _cache[n] = result;
+        _primeCache[n] = result;
         return result;
     }
 
@@ -91,6 +100,10 @@ public class Problem060 : Problem {
         if (n < 2) return false;
         if (n is 2 or 3 or 5 or 7) return true;
         if (n % 2 == 0 || n % 3 == 0 || n % 5 == 0) return false;
+        if (n % 7 == 0 || n % 11 == 0 || n % 13 == 0 || n % 17 == 0 ||
+            n % 19 == 0 || n % 23 == 0 || n % 29 == 0 || n % 31 == 0 ||
+            n % 37 == 0 || n % 41 == 0 || n % 43 == 0)
+            return n is 7 or 11 or 13 or 17 or 19 or 23 or 29 or 31 or 37 or 41 or 43;
 
         long d = n - 1;
         int r = 0;

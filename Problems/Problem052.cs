@@ -6,11 +6,15 @@ public class Problem052 : Problem {
     }
 
     private static int SmallestPermutedMult() {
-        int n = 100;
+        // n must be divisible by 9: same digits ⇒ same digit sum ⇒ n ≡ 2n (mod 9) ⇒ 9|n
+        int n = 99;
         while (true) {
+            n += 9;
             // Skip to next power of 10 range if 6x would have more digits
             if (Library.NumDigits(n) != Library.NumDigits(n * 6)) {
-                n = Library.Pow10(Library.NumDigits(n));
+                int next = Library.Pow10(Library.NumDigits(n));
+                // Align to next multiple of 9
+                n = next + (9 - next % 9) % 9 - 9;
                 continue;
             }
 
@@ -20,7 +24,6 @@ public class Problem052 : Problem {
                 if (DigitSignature(n * i) != sig) { match = false; break; }
             }
             if (match) return n;
-            n++;
         }
     }
 

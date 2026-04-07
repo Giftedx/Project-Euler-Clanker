@@ -2,73 +2,76 @@ namespace Project_Euler.Problems;
 
 public class Problem051 : Problem {
     private const int Limit = 1000000;
-    private readonly bool[] _isPrime;
-    private readonly List<int> _primes;
-
-    public Problem051() {
-        Library.SieveOfEratosthenes(Limit, out _isPrime);
-        // Collect 6-digit primes only
-        _primes = new List<int>();
-        for (int i = Limit / 10; i < Limit; i++) {
-            if (_isPrime[i]) _primes.Add(i);
-        }
-    }
-
-    public override object Solve() {
-        return EightPrimeFamily(8);
-    }
 
     private static readonly int[] Pow10 = [1, 10, 100, 1000, 10000, 100000, 1000000];
 
-    private int EightPrimeFamily(int target) {
-        const int lowerBound = Limit / 10;
-        int numDigits = (int)Math.Log10(Limit);
-        var masks = GenerateMasks(numDigits, 3);
+    public override object Solve() {
+        return EightPrimeFamily();
+    }
 
-        foreach (int p in _primes) {
-            foreach (int mask in masks) {
-                int count = 0;
-                int min = Limit + 1;
+    private int EightPrimeFamily() {
+        bool[] isPrime = Library.GetSieve(Limit);
 
-                for (int i = 0; i < 10; ++i) {
-                    int newNum = Replace(p, mask, i);
+        // Only masks with exactly 3 set bits (divisibility-by-3 argument)
+        // Exclude bit 0 (units digit): replacing with even gives even → at most 5 primes
+        // Positions 1-5 correspond to tens through hundred-thousands digit
+        var masks = new List<int>();
+        for (int mask = 1; mask < (1 << 5); mask++) {
+            if (int.PopCount(mask) == 3)
+                masks.Add(mask << 1); // shift left 1 to skip bit 0 (units)
+        }
 
-                    if (newNum < lowerBound) continue;
+        int lowerBound = Limit / 10;
 
-                    if (_isPrime[newNum]) {
-                        min = Math.Min(min, newNum);
-                        ++count;
-                    } else if (10 - i - 1 + count < target) break;
+        foreach (int mask in masks) {
+            // For each template: fix the non-masked positions, try all 10 replacements
+            // Iterate over all possible values of the 3 fixed positions (units + 2 others)
+            // This is more efficient than iterating all primes
+
+            // Identify which positions are fixed (not in mask)
+            int[] fixedPos = new int[3];
+            int fi = 0;
+            for (int bit = 0; bit < 6; bit++) {
+                if ((mask & (1 << bit)) == 0)
+                    fixedPos[fi++] = bit;
+            }
+
+            // Iterate all combinations of fixed digits
+            for (int d0 = 1; d0 <= 9; d0 += 2) { // units digit must be odd (and not 5)
+                if (d0 == 5) continue;
+                for (int d1 = 0; d1 <= 9; d1++) {
+                    for (int d2 = 0; d2 <= 9; d2++) {
+                        int baseNum = d0 * Pow10[fixedPos[0]]
+                                    + d1 * Pow10[fixedPos[1]]
+                                    + d2 * Pow10[fixedPos[2]];
+
+                        int count = 0;
+                        int min = Limit;
+
+                        for (int rep = 0; rep <= 9; rep++) {
+                            int num = baseNum;
+                            for (int bit = 0; bit < 6; bit++) {
+                                if ((mask & (1 << bit)) != 0)
+                                    num += rep * Pow10[bit];
+                            }
+
+                            if (num < lowerBound) continue; // not 6-digit
+                            if (num >= Limit) continue;
+
+                            if (isPrime[num]) {
+                                count++;
+                                if (num < min) min = num;
+                            } else if (count + (9 - rep) < 8) {
+                                break; // can't reach 8
+                            }
+                        }
+
+                        if (count >= 8) return min;
+                    }
                 }
-
-                if (count == target) return min;
             }
         }
 
         return 0;
-    }
-
-    private static int Replace(int prime, int mask, int replacementDigit) {
-        int result = 0;
-        int shift = 0;
-
-        while (prime > 0) {
-            result += (mask & 1) == 1
-                ? Pow10[shift] * replacementDigit
-                : Pow10[shift] * (prime % 10);
-
-            ++shift;
-            mask >>= 1;
-            prime /= 10;
-        }
-
-        return result;
-    }
-
-    private static List<int> GenerateMasks(int numDigits, int maxSetBits) {
-        var masks = new List<int>();
-        for (int mask = 1; mask < 1 << numDigits; ++mask)
-            if (int.PopCount(mask) <= maxSetBits) masks.Add(mask);
-        return masks;
     }
 }

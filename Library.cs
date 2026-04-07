@@ -7,7 +7,7 @@
 namespace Project_Euler;
 
 public static class Library {
-    private static readonly ConcurrentDictionary<int, bool> _primeCache = new();
+    private static bool[] _primeSieve = [];
     private static readonly ConcurrentDictionary<long, bool> _primeCacheLong = new();
     
     //Program-wide tasks.
@@ -127,36 +127,15 @@ public static class Library {
     }
     
     public static bool IsPrime(int n) {
-        if (_primeCache.TryGetValue(n, out bool cached))
-            return cached;
-
-        bool result;
-        switch (n) {
-            case <= 1:
-                result = false;
-                break;
-            case 2 or 3:
-                result = true;
-                break;
-            default:
-                if (n % 2 == 0 || n % 3 == 0) {
-                    result = false;
-                } else {
-                    result = true;
-                    int limit = (int)Math.Sqrt(n) + 1;
-                    for (int i = 5; i <= limit; i += 6) {
-                        if (n % i == 0 || n % (i + 2) == 0) {
-                            result = false;
-                            break;
-                        }
-                    }
-                }
-
-                break;
+        if (n >= 0 && n < _primeSieve.Length) return _primeSieve[n];
+        if (n <= 1) return false;
+        if (n is 2 or 3) return true;
+        if (n % 2 == 0 || n % 3 == 0) return false;
+        int limit = (int)Math.Sqrt(n) + 1;
+        for (int i = 5; i <= limit; i += 6) {
+            if (n % i == 0 || n % (i + 2) == 0) return false;
         }
-
-        _primeCache[n] = result;
-        return result;
+        return true;
     }
 
     public static bool IsPrime(long n) {
@@ -193,8 +172,7 @@ public static class Library {
     }
 
     public static void PrecomputePrimes(int limit) {
-        bool[] sieve = GetSieve(limit);
-        for (int i = 2; i < limit; i++) _primeCache[i] = sieve[i];
+        _primeSieve = GetSieve(limit);
     }
 
     public static bool IsPentagon(long pn) {
@@ -266,11 +244,12 @@ public static class Library {
     public static void SieveOfEratosthenes(int n, out bool[] isPrime) {
         isPrime = new bool[n];
         if (n <= 2) return;
-        Array.Fill(isPrime, true, 2, n - 2);
+        isPrime[2] = true;
+        for (int i = 3; i < n; i += 2) isPrime[i] = true;
         int limit = (int)Math.Sqrt(n) + 1;
-        for (int i = 2; i < limit; i++) {
+        for (int i = 3; i < limit; i += 2) {
             if (!isPrime[i]) continue;
-            for (int j = i * i; j < n; j += i)
+            for (int j = i * i; j < n; j += 2 * i)
                 isPrime[j] = false;
         }
     }

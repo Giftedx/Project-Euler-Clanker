@@ -1,49 +1,54 @@
 namespace Project_Euler.Problems;
 
 public class Problem032 : Problem {
+
     public override object Solve() {
         return SumPandigitalProducts();
     }
 
-    private int SumPandigitalProducts() {
+    private static int SumPandigitalProducts() {
         HashSet<int> products = [];
 
         for (int a = 1; a < 10; a++)
         for (int b = 1234; b < 9877; b++) {
             int c = a * b;
-            if (c > 9999) continue;
+            if (c > 9999) break;
             if (IsPandigital(a, b, c)) products.Add(c);
         }
 
         for (int a = 12; a < 100; a++)
         for (int b = 123; b < 988; b++) {
             int c = a * b;
-            if (c > 9999) continue;
+            if (c > 9999) break;
             if (IsPandigital(a, b, c)) products.Add(c);
         }
 
-        return products.Sum();
+        int sum = 0;
+        foreach (int p in products) sum += p;
+        return sum;
     }
 
-    private bool IsPandigital(int a, int b, int c) {
-        Span<byte> digits = stackalloc byte[10];
-        int totalDigits = 0;
+    private static bool IsPandigital(int a, int b, int c) {
+        int mask = 0;
+        int count = 0;
 
-        if (!CheckDigits(a, digits, ref totalDigits)) return false;
-        if (!CheckDigits(b, digits, ref totalDigits)) return false;
-        if (!CheckDigits(c, digits, ref totalDigits)) return false;
+        if (!AddDigits(a, ref mask, ref count)) return false;
+        if (!AddDigits(b, ref mask, ref count)) return false;
+        if (!AddDigits(c, ref mask, ref count)) return false;
 
-        return totalDigits == 9;
+        return count == 9 && mask == 0x3FE; // bits 1-9 set
     }
 
-    private bool CheckDigits(int number, Span<byte> digits, ref int total) {
-        while (number > 0) {
-            int d = number % 10;
-            if (d == 0 || digits[d]++ > 0) return false;
-            number /= 10;
-            total++;
+    private static bool AddDigits(int n, ref int mask, ref int count) {
+        while (n > 0) {
+            int d = n % 10;
+            if (d == 0) return false;
+            int bit = 1 << d;
+            if ((mask & bit) != 0) return false;
+            mask |= bit;
+            count++;
+            n /= 10;
         }
-
         return true;
     }
 }

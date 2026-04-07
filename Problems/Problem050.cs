@@ -9,26 +9,26 @@ public class Problem050 : Problem {
     }
 
     private long ConsecutivePrimeSumBelow(int n) {
-        var primes = new List<int>();
+        // Build prefix sums directly — no List needed
+        long[] prefix = new long[80000];
+        int count = 0;
         for (int i = 2; i < n; i++) {
-            if (_isPrime[i]) primes.Add(i);
+            if (!_isPrime[i]) continue;
+            prefix[count + 1] = prefix[count] + i;
+            count++;
         }
 
-        // Build prefix sums
-        long[] prefixSum = new long[primes.Count + 1];
-        for (int i = 0; i < primes.Count; i++) {
-            prefixSum[i + 1] = prefixSum[i] + primes[i];
-        }
+        // Max chain length: largest k where prefix[k] < n
+        int maxLen = count;
+        while (prefix[maxLen] >= n) maxLen--;
 
-        // Search by decreasing length for early termination
-        for (int length = primes.Count; length >= 2; length--) {
-            for (int start = 0; start + length <= primes.Count; start++) {
-                long sum = prefixSum[start + length] - prefixSum[start];
+        for (int len = maxLen; len >= 2; len--) {
+            for (int s = 0; s + len <= count; s++) {
+                long sum = prefix[s + len] - prefix[s];
                 if (sum >= n) break;
                 if (_isPrime[(int)sum]) return sum;
             }
         }
-
         return 0;
     }
 }

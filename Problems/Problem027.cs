@@ -1,8 +1,8 @@
 namespace Project_Euler.Problems;
 
 public class Problem027 : Problem {
-    // n²+an+b can produce values up to ~1000000, extend sieve
-    private const int SieveLimit = 1_000_000;
+    // Max value: n≤80, |a|<1000, b<1000 → n²+an+b < 100000
+    private const int SieveLimit = 100_000;
     private readonly bool[] _isPrime = Library.GetSieve(SieveLimit);
 
     public override object Solve() {
