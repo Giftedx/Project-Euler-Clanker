@@ -75,7 +75,13 @@ public class Problem054 : Problem {
                           freq[values[2]] == 1 && freq[values[3]] == 1 &&
                           freq[values[4]] == 1;
 
-        int highCard = values[4];
+        // Ace-low straight: A-2-3-4-5 (sorted: 2,3,4,5,14)
+        bool isAceLow = !isStraight &&
+                        values[0] == 2 && values[1] == 3 && values[2] == 4 &&
+                        values[3] == 5 && values[4] == 14;
+        if (isAceLow) isStraight = true;
+
+        int highCard = isAceLow ? 5 : values[4];
 
         // Build kickers list (cards not in groups, descending order for proper comparison)
         // Each kicker gets 4 bits, packed from high to low significance
