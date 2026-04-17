@@ -1,6 +1,3 @@
-// ReSharper disable CompareOfFloatsByEqualityOperator
-// ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-
 namespace Project_Euler.Problems;
 
 public class Problem042 : Problem {
@@ -25,8 +22,8 @@ public class Problem042 : Problem {
         return sum;
     }
 
-    private bool IsTriangle(int x) {
-        double n = (-1 + Math.Sqrt(1 + 8 * x)) / 2;
-        return n == (int)n;
+    private static bool IsTriangle(int x) {
+        int s = (int)Math.Sqrt(2 * x);
+        return s * (s + 1) == 2 * x;
     }
 }

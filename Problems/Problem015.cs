@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Project_Euler.Problems;
 
 public class Problem015 : Problem {
@@ -7,7 +5,11 @@ public class Problem015 : Problem {
         return LatticePaths(20, 20);
     }
 
-    private BigInteger LatticePaths(int i, int j) {
-        return Library.Factorial(i + j) / (Library.Factorial(i) * Library.Factorial(j));
+    private long LatticePaths(int rows, int cols) {
+        // C(rows+cols, rows) computed incrementally — always exact since running C(n,k) is integral
+        long result = 1;
+        for (int i = 1; i <= rows; i++)
+            result = result * (cols + i) / i;
+        return result;
     }
 }

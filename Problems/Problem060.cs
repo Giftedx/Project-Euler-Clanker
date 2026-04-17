@@ -42,31 +42,33 @@ public class Problem060 : Problem {
         int n = _primes.Length;
         int best = int.MaxValue;
 
+        // Build HashSets for O(1) containment checks during clique search
+        var adjSet = new HashSet<int>[n];
+        for (int i = 0; i < n; i++)
+            adjSet[i] = new HashSet<int>(_adj[i]);
+
         for (int a = 0; a < n && _primes[a] * 5 < best; a++) {
             var aList = _adj![a];
 
             for (int bi = 0; bi < aList.Count; bi++) {
                 int b = aList[bi];
                 if (_primes[a] + _primes[b] * 4 >= best) break;
-                var bList = _adj[b];
 
                 for (int ci = bi + 1; ci < aList.Count; ci++) {
                     int c = aList[ci];
                     if (_primes[a] + _primes[b] + _primes[c] * 3 >= best) break;
-                    if (!bList.Contains(c)) continue;
-                    var cList = _adj[c];
+                    if (!adjSet[b].Contains(c)) continue;
 
                     for (int di = ci + 1; di < aList.Count; di++) {
                         int d = aList[di];
                         if (_primes[a] + _primes[b] + _primes[c] + _primes[d] * 2 >= best) break;
-                        if (!bList.Contains(d) || !cList.Contains(d)) continue;
-                        var dList = _adj[d];
+                        if (!adjSet[b].Contains(d) || !adjSet[c].Contains(d)) continue;
 
                         for (int ei = di + 1; ei < aList.Count; ei++) {
                             int e = aList[ei];
                             int sum = _primes[a] + _primes[b] + _primes[c] + _primes[d] + _primes[e];
                             if (sum >= best) break;
-                            if (bList.Contains(e) && cList.Contains(e) && dList.Contains(e)) {
+                            if (adjSet[b].Contains(e) && adjSet[c].Contains(e) && adjSet[d].Contains(e)) {
                                 best = sum;
                             }
                         }

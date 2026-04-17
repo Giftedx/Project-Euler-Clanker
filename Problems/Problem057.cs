@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace Project_Euler.Problems;
 
-public class Problem057 : Problem{
+public class Problem057 : Problem {
     public override object Solve() {
         return SquareConvergents();
     }
@@ -10,11 +10,14 @@ public class Problem057 : Problem{
     private int SquareConvergents() {
         BigInteger n = 0;
         BigInteger d = 1;
+        BigInteger pow10 = 10; // smallest power of 10 greater than d
         int count = 0;
-        for(int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1000; i++) {
             (n, d) = (d, d * 2 + n);
-            if(Math.Floor(BigInteger.Log10(n + d) + 1) > 
-               Math.Floor(BigInteger.Log10(d) + 1) ) count++;
+            // Advance threshold when d catches up
+            while (pow10 <= d) pow10 *= 10;
+            // Numerator (n+d) has more digits than denominator (d) iff n+d >= pow10
+            if (n + d >= pow10) count++;
         }
         return count;
     }

@@ -8,6 +8,8 @@ public class Problem037 : Problem {
         return SumTruncatablePrimes();
     }
 
+    private static readonly int[] RightExtendDigits = [1, 3, 7, 9];
+
     private long SumTruncatablePrimes() {
         var results = new List<int>();
         var queue = new Queue<int>([2, 3, 5, 7]);
@@ -17,7 +19,7 @@ public class Problem037 : Problem {
             if (n > 10 && IsTruncatable(n))
                 results.Add(n);
 
-            foreach (int d in new[] { 1, 3, 7, 9 }) {
+            foreach (int d in RightExtendDigits) {
                 int next = n * 10 + d;
                 if (IsPrime(next)) queue.Enqueue(next);
             }

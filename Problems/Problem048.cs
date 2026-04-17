@@ -27,8 +27,7 @@ public class Problem048 : Problem {
     }
 
     private static long MulMod(long a, long b, long mod) {
-        // Split a to avoid overflow: a*b < 10^20, won't fit in long
-        // But (a >> 17) * b < 2^51, fits in long
+        // Split to avoid overflow: a*b can reach 10^20, exceeding long/ulong
         long hi = a >> 17, lo = a & 0x1FFFF;
         return ((hi * b % mod) * 131072 % mod + lo * b % mod) % mod;
     }

@@ -1,5 +1,3 @@
-// ReSharper disable CompareOfFloatsByEqualityOperator
-
 namespace Project_Euler.Problems;
 
 public class Problem044 : Problem {

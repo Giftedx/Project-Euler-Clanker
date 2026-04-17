@@ -13,9 +13,9 @@ public class Problem024 : Problem {
         int nDigits = 0;
 
         while (n-- > 0) {
-            ulong fn = (ulong)Library.Factorial(n);
-            int i = (int)(target / fn);
-            target -= (ulong)i * fn;
+            int fn = Library.IntFactorial(n);
+            int i = (int)(target / (ulong)fn);
+            target -= (ulong)(i * fn);
             number[nDigits++] = digits[i];
 
             for (int r = i; r < n; r++)

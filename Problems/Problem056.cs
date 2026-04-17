@@ -8,15 +8,20 @@ public class Problem056 : Problem {
     }
 
     private int PowerfulDigitSum() {
-        int maxDigitSum = int.MinValue;
-        for (int a = 99; a < 100; a++) {
-            for (int b = 90; b < 100; b++) {
-                BigInteger power = BigInteger.Pow(a, b);
+        int best = 0;
+        // Iterate from large a downward so best is set high early, maximizing pruning
+        for (int a = 99; a >= 2; a--) {
+            double log10a = Math.Log10(a);
+            if (9.0 * 99 * log10a < best) break; // all smaller a will also fail
+
+            BigInteger power = (BigInteger)a;
+            for (int b = 2; b < 100; b++) {
+                power *= a;
+                if (9.0 * (b * log10a + 1) < best) continue;
                 int digitSum = Library.SumDigits(power);
-                maxDigitSum = Math.Max(maxDigitSum, digitSum);
+                if (digitSum > best) best = digitSum;
             }
         }
-
-        return maxDigitSum;
+        return best;
     }
 }

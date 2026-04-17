@@ -8,7 +8,7 @@ public class Problem049 : Problem {
         return OtherPrimePermuteConcat();
     }
 
-    private string OtherPrimePermuteConcat() {
+    private long OtherPrimePermuteConcat() {
         const int gap = 3330;
         for (int i = 1001; i < Limit; i += 2) {
             if (!_isPrime[i]) continue;
@@ -18,10 +18,11 @@ public class Problem049 : Problem {
 
             if (i1 < Limit && _isPrime[i1] && SameDigits(i, i1) &&
                 i2 < Limit && _isPrime[i2] && SameDigits(i, i2) &&
-                i != 1487 && i != 4817 && i != 8147) return $"{i}{i1}{i2}";
+                i != 1487 && i != 4817 && i != 8147)
+                return (long)i * 100_000_000 + (long)i1 * 10_000 + i2;
         }
 
-        return ":(";
+        return -1;
     }
 
     private bool SameDigits(int n, int m) {
