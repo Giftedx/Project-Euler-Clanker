@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 360" width="1280" height="360" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241a2e"/><stop offset="1" stop-color="#33254a"/></linearGradient></defs>
+  <rect width="1280" height="360" fill="url(#bg)"/>
+  <!-- mathematical wallpaper -->
+  <g fill="#9a86c8" opacity="0.18" font-size="26" font-weight="600" font-family="Georgia,serif" font-style="italic">
+    <text x="700" y="70">&#931; n&#178;</text><text x="850" y="320">&#966; = (1+&#8730;5)/2</text>
+    <text x="1130" y="300">mod p</text><text x="660" y="320">10001st prime</text><text x="1150" y="70">e</text>
+  </g>
+  <!-- the clanker: a boxy robot scribbling sums -->
+  <g transform="translate(1000,190)">
+    <rect x="-58" y="-46" width="116" height="92" rx="14" fill="#8a78b0"/>
+    <rect x="-44" y="-30" width="88" height="44" rx="8" fill="#241a2e"/>
+    <circle cx="-18" cy="-8" r="8" fill="#b88f2e"/><circle cx="18" cy="-8" r="8" fill="#b88f2e"/>
+    <rect x="-12" y="58" width="10" height="18" fill="#8a78b0"/><rect x="2" y="58" width="10" height="18" fill="#8a78b0"/>
+    <line x1="0" y1="-46" x2="0" y2="-66" stroke="#8a78b0" stroke-width="5"/><circle cx="0" cy="-72" r="7" fill="#b88f2e"/>
+    <!-- arm + pencil -->
+    <line x1="58" y1="10" x2="104" y2="44" stroke="#8a78b0" stroke-width="10" stroke-linecap="round"/>
+    <line x1="104" y1="44" x2="126" y2="62" stroke="#b88f2e" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <!-- scribbled wrong answer, crossed out -->
+  <g transform="translate(1135,120)" opacity="0.9">
+    <text x="0" y="0" font-size="24" fill="#c0b6d8" font-family="Georgia,serif" font-style="italic">42?</text>
+    <line x1="-6" y1="-8" x2="44" y2="-2" stroke="#c03030" stroke-width="3"/>
+  </g>
+  <!-- title -->
+  <text x="80" y="142" font-size="72" font-weight="800" fill="#f5f0e8" letter-spacing="0.5">Project Euler, Clankered</text>
+  <text x="84" y="186" font-size="21" font-weight="500" fill="#b88f2e" letter-spacing="4">CLASSIC PROBLEMS &#183; C# &#183; FORKED AND RUINED BY A CLANKER</text>
+  <text x="84" y="220" font-size="16" fill="#8a8f96" letter-spacing="2">BENCHMARKED &#183; FACTORIES &#183; SERVICES &#183; ALTOGETHER TOO MUCH ARCHITECTURE FOR SUMS</text>
+</svg>
