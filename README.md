@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/banner.png" alt="Project-Euler-Clanker — RegisterSingleton from ServiceContainer.cs: dependency injection, for maths puzzles" width="100%" />
+
 # Project-Euler-Clanker
 
 **Project Euler once again, but this time in C#. Forked and ruined by a Clanker.**
