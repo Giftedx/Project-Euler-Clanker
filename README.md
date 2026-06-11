@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="./assets/banner.svg" alt="Project Euler, Clankered" width="100%" />
-
 # Project-Euler-Clanker
 
 **Project Euler once again, but this time in C#. Forked and ruined by a Clanker.**
