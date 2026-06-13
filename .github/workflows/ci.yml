@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  verify:
+    name: Verify all solutions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore "Project Euler.csproj"
+
+      - name: Build
+        run: dotnet build "Project Euler.csproj" -c Release --no-restore
+
+      - name: Verify against answer keys
+        run: dotnet run -c Release --project "Project Euler.csproj" --no-build -- --verify

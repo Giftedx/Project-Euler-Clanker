@@ -8,6 +8,7 @@
 
 138 problems. A reflection-driven problem factory. A hand-rolled DI container. A parallel benchmark harness with a progress bar. For a console app that prints integers.
 
+[![CI](https://github.com/Giftedx/Project-Euler-Clanker/actions/workflows/ci.yml/badge.svg)](https://github.com/Giftedx/Project-Euler-Clanker/actions/workflows/ci.yml)
 ![C#](https://img.shields.io/badge/C%23-239120?style=flat&logo=csharp&logoColor=white)
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat&logo=dotnet&logoColor=white)
 ![Problems solved](https://img.shields.io/badge/problems-138_solved-2ea44f?style=flat)
