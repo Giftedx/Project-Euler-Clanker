@@ -16,6 +16,10 @@ obj/
 log.txt
 benchmark.json
 benchmark.html
+results.txt
+
+# Agent / tooling scratch
+docs/superpowers/
 
 # OS files
 Thumbs.db
